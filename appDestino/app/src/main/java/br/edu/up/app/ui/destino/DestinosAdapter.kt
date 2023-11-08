@@ -7,9 +7,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.navigation.findNavController
+import br.edu.up.app.R
 import br.edu.up.app.data.Destino
 import br.edu.up.app.data.Fotos
 import br.edu.up.app.databinding.FragmentItemDestinoBinding
+import coil.load
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 
 class DestinosAdapter(
     private val destinos: List<Destino>,
@@ -33,9 +37,20 @@ class DestinosAdapter(
 
         val itemDestino = destinos[position]
 
-        val idFoto = Fotos.get(itemDestino.foto)
+//        Carregamento local
+//        val idFoto = Fotos.get(itemDestino.foto)
 
-        holder.imgFoto.setImageResource(idFoto)
+//        holder.imgFoto.setImageResource(idFoto)
+//        holder.txtNome.text = itemDestino.nome
+//        holder.txtPais.text = itemDestino.pais
+
+        //Carregamento remoto
+        holder.imgFoto.load(R.drawable.semfoto)
+        Firebase.storage.getReference(itemDestino.foto)
+            .downloadUrl.addOnSuccessListener { imageUrl ->
+                holder.imgFoto.load(imageUrl)
+            }
+
         holder.txtNome.text = itemDestino.nome
         holder.txtPais.text = itemDestino.pais
 
