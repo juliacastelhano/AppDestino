@@ -58,6 +58,7 @@ class DestinoFragment : Fragment() {
         binding.btnSalvar.setOnClickListener {
             val destinoSalvar = Destino(
                 destino.id,
+                destino.docId,
                 binding.inputNome.text.toString(),
                 binding.inputPais.text.toString(),
                 binding.inputPontosTuristicos.text.toString(),
