@@ -1,10 +1,15 @@
 package br.edu.up.app.ui.destino
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.navigation.findNavController
 import br.edu.up.app.R
@@ -39,20 +44,40 @@ class DestinosAdapter(
 
 //        Carregamento local
 //        val idFoto = Fotos.get(itemDestino.foto)
-
+//
 //        holder.imgFoto.setImageResource(idFoto)
 //        holder.txtNome.text = itemDestino.nome
 //        holder.txtPais.text = itemDestino.pais
 
-        //Carregamento remoto
-        holder.imgFoto.load(R.drawable.semfoto)
-        Firebase.storage.getReference(itemDestino.foto)
-            .downloadUrl.addOnSuccessListener { imageUrl ->
-                holder.imgFoto.load(imageUrl)
-            }
+        if (isInternetAvailable(holder.itemView.context)) {
+            //Carregamento remoto
+            holder.imgFoto.load(R.drawable.semfoto)
+            Firebase.storage.getReference(itemDestino.foto)
+                .downloadUrl.addOnSuccessListener { imageUrl ->
+                    holder.imgFoto.load(imageUrl)
+                }
 
+            holder.txtNome.text = itemDestino.nome
+            holder.txtPais.text = itemDestino.pais
+        }
+        else {
+//       Carregamento local
+        val idFoto = Fotos.get(itemDestino.foto)
+
+        holder.imgFoto.setImageResource(idFoto)
         holder.txtNome.text = itemDestino.nome
         holder.txtPais.text = itemDestino.pais
+
+        }
+//        //Carregamento remoto
+//        holder.imgFoto.load(R.drawable.semfoto)
+//        Firebase.storage.getReference(itemDestino.foto)
+//            .downloadUrl.addOnSuccessListener { imageUrl ->
+//                holder.imgFoto.load(imageUrl)
+//            }
+//
+//        holder.txtNome.text = itemDestino.nome
+//        holder.txtPais.text = itemDestino.pais
 
         // editar destino
         holder.itemView.setOnClickListener { view ->
@@ -84,6 +109,39 @@ class DestinosAdapter(
         val imgFoto: ImageView = binding.imgFoto
         val txtNome: TextView = binding.txtNome
         val txtPais: TextView = binding.txtPais
+    }
+
+    private fun isInternetAvailable(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val network = connectivityManager.activeNetwork
+            val capabilities = connectivityManager.getNetworkCapabilities(network)
+            val isConnected = capabilities != null &&
+                    (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+
+            if (isConnected) {
+                Toast.makeText(context, "Conectado", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Não conectado", Toast.LENGTH_SHORT).show()
+            }
+
+            return isConnected
+        } else {
+            val networkInfo = connectivityManager.activeNetworkInfo
+            val isConnected = networkInfo != null && networkInfo.isConnected
+
+            if (isConnected) {
+                Toast.makeText(context, "Conectado", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Não conectado", Toast.LENGTH_SHORT).show()
+            }
+
+            return isConnected
+        }
     }
 
 }
